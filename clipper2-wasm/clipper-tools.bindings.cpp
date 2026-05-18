@@ -45,10 +45,10 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .constructor<>()
         .function("Clear", &SvgWriter::Clear)
         .function("FillRule", &SvgWriter::Fill_Rule)
-        .function("SaveToFile", &SvgWriter::SaveToFile);
+        .function("SaveToFile(filename, maxWidth, maxHeight, margin)", &SvgWriter::SaveToFile);
 
 	// SvgAddSolution
-	function("SvgAddSolution", select_overload<void(SvgWriter&, const PathsD&, FillRule, bool)>(&SvgAddSolution));
+	function("SvgAddSolution(writer, solution, fillRule, isClosed)", select_overload<void(SvgWriter&, const PathsD&, FillRule, bool)>(&SvgAddSolution));
 
 	#ifdef USINGZ
 	class_<PointD>("PointD")
@@ -56,7 +56,7 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
 		.property("x", &PointD::x)
 		.property("y", &PointD::y)
 		.property("z", &PointD::z)
-		.function("SetZ", &PointD::SetZ);
+		.function("SetZ(z)", &PointD::SetZ);
 	#else
 	class_<PointD>("PointD")
 		.constructor<double, double>()
@@ -68,11 +68,11 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
 		.constructor<>()
 		.function("size", &PathD::size)
 		.function("clear", &PathD::clear)
-		.function("push_back", select_overload<void(const PointD&)>(&PathD::push_back))
-		.function("get", select_overload<PointD&(size_t)>(&PathD::operator[]), allow_raw_pointers())
+		.function("push_back(point)", select_overload<void(const PointD&)>(&PathD::push_back))
+		.function("get(index)", select_overload<PointD&(size_t)>(&PathD::operator[]), allow_raw_pointers())
 #ifdef USINGZ
 		.function("view", &PathD_view)
-		.function("assign", &PathD_assign)
+		.function("assign(coordinates)", &PathD_assign)
 #endif
 		;
 
@@ -80,8 +80,8 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
 		.constructor<>()
 		.function("size", &PathsD::size)
 		.function("clear", &PathsD::clear)
-		.function("push_back", select_overload<void(const PathD&)>(&PathsD::push_back))
-		.function("get", select_overload<PathD&(size_t)>(&PathsD::operator[]), allow_raw_pointers());
+		.function("push_back(path)", select_overload<void(const PathD&)>(&PathsD::push_back))
+		.function("get(index)", select_overload<PathD&(size_t)>(&PathsD::operator[]), allow_raw_pointers());
 
 	// Point64 bindings (for now only support USINGZ=ON)
 	#ifdef USINGZ
@@ -90,7 +90,7 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
 		.property("x", &Point64::x)
 		.property("y", &Point64::y)
 		.property("z", &Point64::z)
-		.function("SetZ", &Point64::SetZ);
+		.function("SetZ(z)", &Point64::SetZ);
 	#else
 	class_<Point64>("Point64")
 		.constructor<int64_t, int64_t>()
