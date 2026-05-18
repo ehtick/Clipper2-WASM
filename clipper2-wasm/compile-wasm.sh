@@ -9,10 +9,7 @@ mkdir -p clipper2-wasm/dist/es
 mkdir -p clipper2-wasm/dist/umd
 
 # Common flags
-# EXPORTED_RUNTIME_METHODS=['HEAPU8']: required for callers that read
-# Module.HEAPU8.byteLength (bench telemetry). Without it, dev builds with
-# ASSERTIONS=2 abort on access. Stock npm 0.2.1 worked because it shipped a
-# prod build with looser assertion behaviour.
+# HEAPU8 export is needed for HEAPU8.byteLength access under ASSERTIONS=2 (dev).
 COMMON_FLAGS="-Iclipper2/CPP/Clipper2Lib/include -DUSINGZ --bind -s MODULARIZE=1 -s WASM_BIGINT -s ALLOW_MEMORY_GROWTH=1 -s EXIT_RUNTIME=0 -s EXPORTED_RUNTIME_METHODS=['HEAPU8']"
 
 # Development build flags
