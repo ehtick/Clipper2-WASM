@@ -93,7 +93,7 @@ ClipperD* CreateClipperD(bool preserveCollinear) {
 EMSCRIPTEN_BINDINGS(clipper_module) {
         class_<ClipperBase>("ClipperBase")
         .function("Clear", &ClipperBase::Clear)
-        .function("SetPreserveCollinear", select_overload<void(bool)>(&ClipperBase::PreserveCollinear))
+        .function("SetPreserveCollinear(preserveCollinear)", select_overload<void(bool)>(&ClipperBase::PreserveCollinear))
         .function("GetPreserveCollinear", select_overload<bool() const>(&ClipperBase::PreserveCollinear));
 
         enum_<FillRule>("FillRule")
@@ -154,7 +154,7 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .property("x", &Point64::x)
         .property("y", &Point64::y)
         .property("z", &Point64::z)
-        .function("SetZ", &Point64::SetZ);
+        .function("SetZ(z)", &Point64::SetZ);
 	#endif
 
 	// Path64
@@ -162,11 +162,11 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .constructor<>()
         .function("size", &Path64::size)
         .function("clear", &Path64::clear)
-        .function("push_back", select_overload<void(const Point64&)>(&Path64::push_back))
-        .function("get", select_overload<Point64&(size_t)>(&Path64::operator[]), allow_raw_pointers())
+        .function("push_back(point)", select_overload<void(const Point64&)>(&Path64::push_back))
+        .function("get(index)", select_overload<Point64&(size_t)>(&Path64::operator[]), allow_raw_pointers())
 #ifdef USINGZ
         .function("view", &Path64_view)
-        .function("assign", &Path64_assign)
+        .function("assign(coordinates)", &Path64_assign)
 #endif
         ;
 
@@ -175,15 +175,15 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .constructor<>()
         .function("size", &Paths64::size)
         .function("clear", &Paths64::clear)
-        .function("push_back", select_overload<void(const Path64&)>(&Paths64::push_back))
-        .function("get", select_overload<Path64&(size_t)>(&Paths64::operator[]), allow_raw_pointers());
+        .function("push_back(path)", select_overload<void(const Path64&)>(&Paths64::push_back))
+        .function("get(index)", select_overload<Path64&(size_t)>(&Paths64::operator[]), allow_raw_pointers());
 
         // Misc64
-        function("AreaPath64", select_overload<double(const Path64&)>(&Area), allow_raw_pointers());
-        function("AreaPaths64", select_overload<double(const Paths64&)>(&Area), allow_raw_pointers());
-        function("IsPositive64", select_overload<bool(const Path64&)>(&IsPositive), allow_raw_pointers());
-        function("PointInPolygon64", select_overload<PointInPolygonResult(const Point64&, const Path64&)>(&PointInPolygon), allow_raw_pointers());
-        function("ReversePath64", &ReversePath<int64_t>, allow_raw_pointers());
+        function("AreaPath64(path)", select_overload<double(const Path64&)>(&Area), allow_raw_pointers());
+        function("AreaPaths64(paths)", select_overload<double(const Paths64&)>(&Area), allow_raw_pointers());
+        function("IsPositive64(poly)", select_overload<bool(const Path64&)>(&IsPositive), allow_raw_pointers());
+        function("PointInPolygon64(point, polygon)", select_overload<PointInPolygonResult(const Point64&, const Path64&)>(&PointInPolygon), allow_raw_pointers());
+        function("ReversePath64(path)", &ReversePath<int64_t>, allow_raw_pointers());
 
         // Geometry64
         class_<Rect64>("Rect64")
@@ -198,49 +198,49 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .function("Height", select_overload<int64_t() const>(&Rect<int64_t>::Height))
         .function("MidPoint", &Rect64::MidPoint)
         .function("AsPath", &Rect64::AsPath)
-        .function("ContainsPoint", select_overload<bool(const Point<int64_t>&) const>(&Rect<int64_t>::Contains))
-        .function("ContainsRect", select_overload<bool(const Rect<int64_t>&) const>(&Rect<int64_t>::Contains))
-        .function("Scale", &Rect64::Scale)
+        .function("ContainsPoint(point)", select_overload<bool(const Point<int64_t>&) const>(&Rect<int64_t>::Contains))
+        .function("ContainsRect(rect)", select_overload<bool(const Rect<int64_t>&) const>(&Rect<int64_t>::Contains))
+        .function("Scale(scale)", &Rect64::Scale)
         .function("IsEmpty", &Rect64::IsEmpty)
-        .function("Intersects", &Rect64::Intersects)
-        .function("Equals", &Rect64::operator==);
+        .function("Intersects(rect)", &Rect64::Intersects)
+        .function("Equals(other)", &Rect64::operator==);
 
-        function("Ellipse64", select_overload<Path64(const Point64&, double, double, size_t)>(&Ellipse), allow_raw_pointers());
-        function("EllipseFromRect64", select_overload<Path64(const Rect64&, size_t)>(&Ellipse), allow_raw_pointers());
+        function("Ellipse64(center, radiusX, radiusY, steps)", select_overload<Path64(const Point64&, double, double, size_t)>(&Ellipse), allow_raw_pointers());
+        function("EllipseFromRect64(rect, steps)", select_overload<Path64(const Rect64&, size_t)>(&Ellipse), allow_raw_pointers());
 
         // Translate64
-        function("TranslatePath64", select_overload<Path64(const Path64&, int64_t, int64_t)>(&TranslatePath), allow_raw_pointers());
-        function("TranslatePaths64", select_overload<Paths64(const Paths64&, int64_t, int64_t)>(&TranslatePaths), allow_raw_pointers());
+        function("TranslatePath64(path, dx, dy)", select_overload<Path64(const Path64&, int64_t, int64_t)>(&TranslatePath), allow_raw_pointers());
+        function("TranslatePaths64(paths, dx, dy)", select_overload<Paths64(const Paths64&, int64_t, int64_t)>(&TranslatePaths), allow_raw_pointers());
 
         // RectClip64
-        function("RectClipPaths64", select_overload<Paths64(const Rect64&, const Paths64&)>(&RectClip), allow_raw_pointers());
-        function("RectClipPath64", select_overload<Paths64(const Rect64&, const Path64&)>(&RectClip), allow_raw_pointers());
-        function("RectClipLinesPaths64", select_overload<Paths64(const Rect64&, const Paths64&)>(&RectClipLines), allow_raw_pointers());
-        function("RectClipLinesPath64", select_overload<Paths64(const Rect64&, const Path64&)>(&RectClipLines), allow_raw_pointers());
+        function("RectClipPaths64(rect, paths)", select_overload<Paths64(const Rect64&, const Paths64&)>(&RectClip), allow_raw_pointers());
+        function("RectClipPath64(rect, path)", select_overload<Paths64(const Rect64&, const Path64&)>(&RectClip), allow_raw_pointers());
+        function("RectClipLinesPaths64(rect, lines)", select_overload<Paths64(const Rect64&, const Paths64&)>(&RectClipLines), allow_raw_pointers());
+        function("RectClipLinesPath64(rect, line)", select_overload<Paths64(const Rect64&, const Path64&)>(&RectClipLines), allow_raw_pointers());
 
         // Minkowski
-        function("MinkowskiSum64", select_overload<Paths64(const Path64&, const Path64&, bool)>(&MinkowskiSum), allow_raw_pointers());
-        function("MinkowskiDiff64", select_overload<Paths64(const Path64&, const Path64&, bool)>(&MinkowskiDiff), allow_raw_pointers());
+        function("MinkowskiSum64(pattern, path, isClosed)", select_overload<Paths64(const Path64&, const Path64&, bool)>(&MinkowskiSum), allow_raw_pointers());
+        function("MinkowskiDiff64(pattern, path, isClosed)", select_overload<Paths64(const Path64&, const Path64&, bool)>(&MinkowskiDiff), allow_raw_pointers());
 
         // BooleanOps
-        function("BooleanOp64", select_overload<Paths64(ClipType, FillRule, const Paths64&, const Paths64&)>(&BooleanOp), allow_raw_pointers());
-        function("BooleanOpOut64", select_overload<void(ClipType, FillRule, const Paths64&, const Paths64&, PolyTree64&)>(&BooleanOp), allow_raw_pointers());
-        function("Intersect64", select_overload<Paths64(const Paths64&, const Paths64&, FillRule)>(&Intersect), allow_raw_pointers());
-        function("Union64", select_overload<Paths64(const Paths64&, const Paths64&, FillRule)>(&Union), allow_raw_pointers());
-        function("UnionSelf64", select_overload<Paths64(const Paths64&, FillRule)>(&Union), allow_raw_pointers());
-        function("Difference64", select_overload<Paths64(const Paths64&, const Paths64&, FillRule)>(&Difference), allow_raw_pointers());
-        function("Xor64", select_overload<Paths64(const Paths64&, const Paths64&, FillRule)>(&Xor), allow_raw_pointers());
+        function("BooleanOp64(clipType, fillRule, subjects, clips)", select_overload<Paths64(ClipType, FillRule, const Paths64&, const Paths64&)>(&BooleanOp), allow_raw_pointers());
+        function("BooleanOpOut64(clipType, fillRule, subjects, clips, solution)", select_overload<void(ClipType, FillRule, const Paths64&, const Paths64&, PolyTree64&)>(&BooleanOp), allow_raw_pointers());
+        function("Intersect64(subjects, clips, fillRule)", select_overload<Paths64(const Paths64&, const Paths64&, FillRule)>(&Intersect), allow_raw_pointers());
+        function("Union64(subjects, clips, fillRule)", select_overload<Paths64(const Paths64&, const Paths64&, FillRule)>(&Union), allow_raw_pointers());
+        function("UnionSelf64(subjects, fillRule)", select_overload<Paths64(const Paths64&, FillRule)>(&Union), allow_raw_pointers());
+        function("Difference64(subjects, clips, fillRule)", select_overload<Paths64(const Paths64&, const Paths64&, FillRule)>(&Difference), allow_raw_pointers());
+        function("Xor64(subjects, clips, fillRule)", select_overload<Paths64(const Paths64&, const Paths64&, FillRule)>(&Xor), allow_raw_pointers());
 
         // Offset
-        function("InflatePaths64", select_overload<Paths64(const Paths64&, double, JoinType, EndType, double, double)>(&InflatePaths), allow_raw_pointers());
+        function("InflatePaths64(paths, delta, joinType, endType, miterLimit, arcTolerance)", select_overload<Paths64(const Paths64&, double, JoinType, EndType, double, double)>(&InflatePaths), allow_raw_pointers());
 
         // Simplify
-        function("SimplifyPath64", select_overload<Path64(const Path64&, double, bool)>(&SimplifyPath), allow_raw_pointers());
-        function("SimplifyPaths64", select_overload<Paths64(const Paths64&, double, bool)>(&SimplifyPaths), allow_raw_pointers());
-        function("TrimCollinear64", select_overload<Path64(const Path64&, bool)>(&TrimCollinear), allow_raw_pointers());
+        function("SimplifyPath64(path, epsilon, isClosedPath)", select_overload<Path64(const Path64&, double, bool)>(&SimplifyPath), allow_raw_pointers());
+        function("SimplifyPaths64(paths, epsilon, isClosedPath)", select_overload<Paths64(const Paths64&, double, bool)>(&SimplifyPaths), allow_raw_pointers());
+        function("TrimCollinear64(path, isOpenPath)", select_overload<Path64(const Path64&, bool)>(&TrimCollinear), allow_raw_pointers());
 
         // Triangulate
-        function("Triangulate64", &Triangulate64, allow_raw_pointers());
+        function("Triangulate64(paths, useDelaunay)", &Triangulate64, allow_raw_pointers());
 
         // PolyPath
         class_<PolyPath>("PolyPath")
@@ -249,26 +249,26 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         // PolyPath64
         class_<PolyPath64, base<PolyPath>>("PolyPath64")
         .constructor<>()
-        .function("addChild", &PolyPath64::AddChild, allow_raw_pointers())
+        .function("addChild(path)", &PolyPath64::AddChild, allow_raw_pointers())
         .function("clear", &PolyPath64::Clear)
         .function("count", &PolyPath64::Count)
         .function("polygon", &PolyPath64::Polygon)
         .function("area", &PolyPath64::Area)
-        .function("child", &PolyPath64::Child, allow_raw_pointers());
+        .function("child(index)", &PolyPath64::Child, allow_raw_pointers());
 
         // Clipper64
         class_<Clipper64, base<ClipperBase>>("Clipper64")
         .constructor<>()
-        .function("AddSubject", &Clipper64::AddSubject, allow_raw_pointers())
-        .function("AddOpenSubject", &Clipper64::AddOpenSubject, allow_raw_pointers())
-        .function("AddClip", &Clipper64::AddClip, allow_raw_pointers())
+        .function("AddSubject(subjects)", &Clipper64::AddSubject, allow_raw_pointers())
+        .function("AddOpenSubject(openSubjects)", &Clipper64::AddOpenSubject, allow_raw_pointers())
+        .function("AddClip(clips)", &Clipper64::AddClip, allow_raw_pointers())
         .function("Clear", &Clipper64::Clear)
-        .function("ExecutePath", select_overload<bool(ClipType, FillRule, Paths64&)>(&Clipper64::Execute), allow_raw_pointers())
-        .function("ExecutePath", select_overload<bool(ClipType, FillRule, Paths64&, Paths64&)>(&Clipper64::Execute), allow_raw_pointers())
-        .function("ExecutePoly", select_overload<bool(ClipType, FillRule, PolyTree64&)>(&Clipper64::Execute), allow_raw_pointers())
-        .function("ExecutePoly", select_overload<bool(ClipType, FillRule, PolyTree64&, Paths64&)>(&Clipper64::Execute), allow_raw_pointers());
+        .function("ExecutePath(clipType, fillRule, closedPaths)", select_overload<bool(ClipType, FillRule, Paths64&)>(&Clipper64::Execute), allow_raw_pointers())
+        .function("ExecutePath(clipType, fillRule, closedPaths, openPaths)", select_overload<bool(ClipType, FillRule, Paths64&, Paths64&)>(&Clipper64::Execute), allow_raw_pointers())
+        .function("ExecutePoly(clipType, fillRule, polyTree)", select_overload<bool(ClipType, FillRule, PolyTree64&)>(&Clipper64::Execute), allow_raw_pointers())
+        .function("ExecutePoly(clipType, fillRule, polyTree, openPaths)", select_overload<bool(ClipType, FillRule, PolyTree64&, Paths64&)>(&Clipper64::Execute), allow_raw_pointers());
 
-        function("CreateClipper64", &CreateClipper64, allow_raw_pointers());
+        function("CreateClipper64(preserveCollinear)", &CreateClipper64, allow_raw_pointers());
 
         // #############################
         // ###### 32 bit bindings ######
@@ -281,7 +281,7 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .property("x", &PointD::x)
         .property("y", &PointD::y)
         .property("z", &PointD::z)
-        .function("SetZ", &PointD::SetZ);
+        .function("SetZ(z)", &PointD::SetZ);
 	#endif
 
 	// PathD
@@ -289,11 +289,11 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .constructor<>()
         .function("size", &PathD::size)
         .function("clear", &PathD::clear)
-        .function("push_back", select_overload<void(const PointD&)>(&PathD::push_back))
-        .function("get", select_overload<PointD&(size_t)>(&PathD::operator[]), allow_raw_pointers())
+        .function("push_back(point)", select_overload<void(const PointD&)>(&PathD::push_back))
+        .function("get(index)", select_overload<PointD&(size_t)>(&PathD::operator[]), allow_raw_pointers())
 #ifdef USINGZ
         .function("view", &PathD_view)
-        .function("assign", &PathD_assign)
+        .function("assign(coordinates)", &PathD_assign)
 #endif
         ;
 
@@ -302,15 +302,15 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
 		.constructor<>()
 		.function("size", &PathsD::size)
 		.function("clear", &PathsD::clear)
-		.function("push_back", select_overload<void(const PathD&)>(&PathsD::push_back))
-		.function("get", select_overload<PathD&(size_t)>(&PathsD::operator[]), allow_raw_pointers());
+		.function("push_back(path)", select_overload<void(const PathD&)>(&PathsD::push_back))
+		.function("get(index)", select_overload<PathD&(size_t)>(&PathsD::operator[]), allow_raw_pointers());
 
         // MiscD
-        function("AreaPathD", select_overload<double(const PathD&)>(&Area), allow_raw_pointers());
-        function("AreaPathsD", select_overload<double(const PathsD&)>(&Area), allow_raw_pointers());
-        function("IsPositiveD", select_overload<bool(const PathD&)>(&IsPositive), allow_raw_pointers());
-        function("PointInPolygonD", select_overload<PointInPolygonResult(const PointD&, const PathD&)>(&PointInPolygon), allow_raw_pointers());
-        function("ReversePathD", &ReversePath<double>, allow_raw_pointers());
+        function("AreaPathD(path)", select_overload<double(const PathD&)>(&Area), allow_raw_pointers());
+        function("AreaPathsD(paths)", select_overload<double(const PathsD&)>(&Area), allow_raw_pointers());
+        function("IsPositiveD(poly)", select_overload<bool(const PathD&)>(&IsPositive), allow_raw_pointers());
+        function("PointInPolygonD(point, polygon)", select_overload<PointInPolygonResult(const PointD&, const PathD&)>(&PointInPolygon), allow_raw_pointers());
+        function("ReversePathD(path)", &ReversePath<double>, allow_raw_pointers());
 
         // GeometryD
         class_<RectD>("RectD")
@@ -325,71 +325,71 @@ EMSCRIPTEN_BINDINGS(clipper_module) {
         .function("Height", select_overload<double() const>(&Rect<double>::Height))
         .function("MidPoint", &RectD::MidPoint)
         .function("AsPath", &RectD::AsPath)
-        .function("ContainsPoint", select_overload<bool(const Point<double>&) const>(&Rect<double>::Contains))
-        .function("ContainsRect", select_overload<bool(const Rect<double>&) const>(&Rect<double>::Contains))
-        .function("Scale", &RectD::Scale)
+        .function("ContainsPoint(point)", select_overload<bool(const Point<double>&) const>(&Rect<double>::Contains))
+        .function("ContainsRect(rect)", select_overload<bool(const Rect<double>&) const>(&Rect<double>::Contains))
+        .function("Scale(scale)", &RectD::Scale)
         .function("IsEmpty", &RectD::IsEmpty)
-        .function("Intersects", &RectD::Intersects)
-        .function("Equals", &RectD::operator==);
+        .function("Intersects(rect)", &RectD::Intersects)
+        .function("Equals(other)", &RectD::operator==);
 
-        function("EllipseD", select_overload<PathD(const PointD&, double, double, size_t)>(&Ellipse), allow_raw_pointers());
-        function("EllipseFromRectD", select_overload<PathD(const RectD&, size_t)>(&Ellipse), allow_raw_pointers());
+        function("EllipseD(center, radiusX, radiusY, steps)", select_overload<PathD(const PointD&, double, double, size_t)>(&Ellipse), allow_raw_pointers());
+        function("EllipseFromRectD(rect, steps)", select_overload<PathD(const RectD&, size_t)>(&Ellipse), allow_raw_pointers());
 
         // TranslateD
-        function("TranslatePathD", select_overload<PathD(const PathD&, double, double)>(&TranslatePath), allow_raw_pointers());
-        function("TranslatePathsD", select_overload<PathsD(const PathsD&, double, double)>(&TranslatePaths), allow_raw_pointers());
+        function("TranslatePathD(path, dx, dy)", select_overload<PathD(const PathD&, double, double)>(&TranslatePath), allow_raw_pointers());
+        function("TranslatePathsD(paths, dx, dy)", select_overload<PathsD(const PathsD&, double, double)>(&TranslatePaths), allow_raw_pointers());
 
         // RectClipD
-        function("RectClipPathsD", select_overload<PathsD(const RectD&, const PathsD&, int)>(&RectClip), allow_raw_pointers());
-        function("RectClipPathD", select_overload<PathsD(const RectD&, const PathD&, int)>(&RectClip), allow_raw_pointers());
-        function("RectClipLinesPathsD", select_overload<PathsD(const RectD&, const PathsD&, int)>(&RectClipLines), allow_raw_pointers());
-        function("RectClipLinesPathD", select_overload<PathsD(const RectD&, const PathD&, int)>(&RectClipLines), allow_raw_pointers());
+        function("RectClipPathsD(rect, paths, precision)", select_overload<PathsD(const RectD&, const PathsD&, int)>(&RectClip), allow_raw_pointers());
+        function("RectClipPathD(rect, path, precision)", select_overload<PathsD(const RectD&, const PathD&, int)>(&RectClip), allow_raw_pointers());
+        function("RectClipLinesPathsD(rect, lines, precision)", select_overload<PathsD(const RectD&, const PathsD&, int)>(&RectClipLines), allow_raw_pointers());
+        function("RectClipLinesPathD(rect, line, precision)", select_overload<PathsD(const RectD&, const PathD&, int)>(&RectClipLines), allow_raw_pointers());
 
         // Minkowski
-        function("MinkowskiSumD", select_overload<PathsD(const PathD&, const PathD&, bool, int)>(&MinkowskiSum), allow_raw_pointers());
-        function("MinkowskiDiffD", select_overload<PathsD(const PathD&, const PathD&, bool, int)>(&MinkowskiDiff), allow_raw_pointers());
+        function("MinkowskiSumD(pattern, path, isClosed, decimalPlaces)", select_overload<PathsD(const PathD&, const PathD&, bool, int)>(&MinkowskiSum), allow_raw_pointers());
+        function("MinkowskiDiffD(pattern, path, isClosed, decimalPlaces)", select_overload<PathsD(const PathD&, const PathD&, bool, int)>(&MinkowskiDiff), allow_raw_pointers());
 
         // BooleanOps
-        function("BooleanOpD", select_overload<PathsD(ClipType, FillRule, const PathsD&, const PathsD&, int)>(&BooleanOp), allow_raw_pointers());
-        function("BooleanOpOutD", select_overload<void(ClipType, FillRule, const PathsD&, const PathsD&, PolyTreeD&, int)>(&BooleanOp), allow_raw_pointers());
-        function("IntersectD", select_overload<PathsD(const PathsD&, const PathsD&, FillRule, int)>(&Intersect), allow_raw_pointers());
-        function("UnionD", select_overload<PathsD(const PathsD&, const PathsD&, FillRule, int)>(&Union), allow_raw_pointers());
-        function("UnionSelfD", select_overload<PathsD(const PathsD&, FillRule, int)>(&Union), allow_raw_pointers());
-        function("DifferenceD", select_overload<PathsD(const PathsD&, const PathsD&, FillRule, int)>(&Difference), allow_raw_pointers());
-        function("XorD", select_overload<PathsD(const PathsD&, const PathsD&, FillRule, int)>(&Xor), allow_raw_pointers());
+        function("BooleanOpD(clipType, fillRule, subjects, clips, precision)", select_overload<PathsD(ClipType, FillRule, const PathsD&, const PathsD&, int)>(&BooleanOp), allow_raw_pointers());
+        function("BooleanOpOutD(clipType, fillRule, subjects, clips, polyTree, precision)", select_overload<void(ClipType, FillRule, const PathsD&, const PathsD&, PolyTreeD&, int)>(&BooleanOp), allow_raw_pointers());
+        function("IntersectD(subjects, clips, fillRule, decimalPrecision)", select_overload<PathsD(const PathsD&, const PathsD&, FillRule, int)>(&Intersect), allow_raw_pointers());
+        function("UnionD(subjects, clips, fillRule, decimalPrecision)", select_overload<PathsD(const PathsD&, const PathsD&, FillRule, int)>(&Union), allow_raw_pointers());
+        function("UnionSelfD(subjects, fillRule, precision)", select_overload<PathsD(const PathsD&, FillRule, int)>(&Union), allow_raw_pointers());
+        function("DifferenceD(subjects, clips, fillRule, decimalPrecision)", select_overload<PathsD(const PathsD&, const PathsD&, FillRule, int)>(&Difference), allow_raw_pointers());
+        function("XorD(subjects, clips, fillRule, decimalPrecision)", select_overload<PathsD(const PathsD&, const PathsD&, FillRule, int)>(&Xor), allow_raw_pointers());
 
         // Offset
-        function("InflatePathsD", select_overload<PathsD(const PathsD&, double, JoinType, EndType, double, int, double)>(&InflatePaths), allow_raw_pointers());
+        function("InflatePathsD(paths, delta, joinType, endType, miterLimit, precision, arcTolerance)", select_overload<PathsD(const PathsD&, double, JoinType, EndType, double, int, double)>(&InflatePaths), allow_raw_pointers());
 
         // Simplify
-        function("SimplifyPathD", select_overload<PathD(const PathD&, double, bool)>(&SimplifyPath), allow_raw_pointers());
-        function("SimplifyPathsD", select_overload<PathsD(const PathsD&, double, bool)>(&SimplifyPaths), allow_raw_pointers());
-        function("TrimCollinearD", select_overload<PathD(const PathD&, int, bool)>(&TrimCollinear), allow_raw_pointers());
+        function("SimplifyPathD(path, epsilon, isClosedPath)", select_overload<PathD(const PathD&, double, bool)>(&SimplifyPath), allow_raw_pointers());
+        function("SimplifyPathsD(paths, epsilon, isClosedPath)", select_overload<PathsD(const PathsD&, double, bool)>(&SimplifyPaths), allow_raw_pointers());
+        function("TrimCollinearD(path, precision, isOpenPath)", select_overload<PathD(const PathD&, int, bool)>(&TrimCollinear), allow_raw_pointers());
 
         // Triangulate
-        function("TriangulateD", &TriangulateD, allow_raw_pointers());
+        function("TriangulateD(paths, decimalPlaces, useDelaunay)", &TriangulateD, allow_raw_pointers());
 
         // PolyPathD
         class_<PolyPathD, base<PolyPath>>("PolyPathD")
         .constructor<>()
-        .function("addChild", select_overload<PolyPathD*(const PathD&)>(&PolyPathD::AddChild), allow_raw_pointers())
+        .function("addChild(path)", select_overload<PolyPathD*(const PathD&)>(&PolyPathD::AddChild), allow_raw_pointers())
         .function("clear", &PolyPathD::Clear)
         .function("count", &PolyPathD::Count)
         .function("polygon", &PolyPathD::Polygon)
         .function("area", &PolyPathD::Area)
-        .function("child", &PolyPathD::Child, allow_raw_pointers());
+        .function("child(index)", &PolyPathD::Child, allow_raw_pointers());
 
         // ClipperD
         class_<ClipperD, base<ClipperBase>>("ClipperD")
         .constructor<int>()
-        .function("AddSubject", &ClipperD::AddSubject, allow_raw_pointers())
-        .function("AddOpenSubject", &ClipperD::AddOpenSubject, allow_raw_pointers())
-        .function("AddClip", &ClipperD::AddClip, allow_raw_pointers())
+        .function("AddSubject(subjects)", &ClipperD::AddSubject, allow_raw_pointers())
+        .function("AddOpenSubject(openSubjects)", &ClipperD::AddOpenSubject, allow_raw_pointers())
+        .function("AddClip(clips)", &ClipperD::AddClip, allow_raw_pointers())
         .function("Clear", &ClipperD::Clear)
-        .function("ExecutePath", select_overload<bool(ClipType, FillRule, PathsD&)>(&ClipperD::Execute), allow_raw_pointers())
-        .function("ExecutePath", select_overload<bool(ClipType, FillRule, PathsD&, PathsD&)>(&ClipperD::Execute), allow_raw_pointers())
-        .function("ExecutePoly", select_overload<bool(ClipType, FillRule, PolyTreeD&)>(&ClipperD::Execute), allow_raw_pointers())
-        .function("ExecutePoly", select_overload<bool(ClipType, FillRule, PolyTreeD&, PathsD&)>(&ClipperD::Execute), allow_raw_pointers());
+        .function("ExecutePath(clipType, fillRule, closedPaths)", select_overload<bool(ClipType, FillRule, PathsD&)>(&ClipperD::Execute), allow_raw_pointers())
+        .function("ExecutePath(clipType, fillRule, closedPaths, openPaths)", select_overload<bool(ClipType, FillRule, PathsD&, PathsD&)>(&ClipperD::Execute), allow_raw_pointers())
+        .function("ExecutePoly(clipType, fillRule, polyTree)", select_overload<bool(ClipType, FillRule, PolyTreeD&)>(&ClipperD::Execute), allow_raw_pointers())
+        .function("ExecutePoly(clipType, fillRule, polyTree, openPaths)", select_overload<bool(ClipType, FillRule, PolyTreeD&, PathsD&)>(&ClipperD::Execute), allow_raw_pointers());
 
-        function("CreateClipperD", &CreateClipperD, allow_raw_pointers());
+        function("CreateClipperD(preserveCollinear)", &CreateClipperD, allow_raw_pointers());
 }
